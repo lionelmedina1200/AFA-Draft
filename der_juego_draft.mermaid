@@ -1,0 +1,62 @@
+erDiagram
+    SELECCIONES {
+        int id PK
+        varchar nombre "UNIQUE"
+    }
+
+    MUNDIALES {
+        int id PK
+        int anio "UNIQUE"
+    }
+
+    PLANTELES {
+        int id PK
+        int seleccion_id FK
+        int mundial_id FK
+    }
+
+    JUGADORES {
+        int id PK
+        varchar nombre
+        varchar apellido
+    }
+
+    PLANTEL_JUGADORES {
+        int id PK
+        int plantel_id FK
+        int jugador_id FK
+        varchar posicion
+        int dorsal
+        int valoracion
+    }
+
+    PARTIDAS {
+        int id PK
+        varchar nombre_equipo
+        varchar formacion
+        datetime fecha_inicio
+    }
+
+    EQUIPO_PARTIDA {
+        int id PK
+        int partida_id FK
+        int plantel_jugador_id FK
+        varchar slot "UNIQUE junto a partida_id"
+    }
+
+    RESULTADOS {
+        int id PK
+        int partida_id FK
+        varchar ronda
+        varchar rival
+        int goles_favor
+        int goles_contra
+    }
+
+    SELECCIONES ||--o{ PLANTELES : "tiene"
+    MUNDIALES ||--o{ PLANTELES : "edicion de"
+    PLANTELES ||--o{ PLANTEL_JUGADORES : "incluye"
+    JUGADORES ||--o{ PLANTEL_JUGADORES : "participa en"
+    PLANTEL_JUGADORES ||--o{ EQUIPO_PARTIDA : "elegido en"
+    PARTIDAS ||--o{ EQUIPO_PARTIDA : "arma"
+    PARTIDAS ||--o{ RESULTADOS : "genera"

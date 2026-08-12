@@ -1,0 +1,63 @@
+# Juego Draft — Base de datos
+
+Este ZIP trae:
+
+- `juego_draft.sql` → el script que crea la base completa (tablas + datos de los 22 planteles).
+- `der_juego_draft.mermaid` → el diagrama entidad-relación (DER) del proyecto.
+- `afa-draft.html` → una versión jugable del juego (HTML/JS puro, con los datos
+  reales de la base incrustados) para probar la lógica del draft y el Mundial
+  directamente en el navegador, sin necesidad de XAMPP. Esto es solo para
+  probar rápido — la entrega real del colegio es la versión Vue + PHP + MySQL
+  usando el `.sql` de acá.
+
+## ¿Dónde se ejecuta esto?
+
+Este NO es un archivo que se "corra" en Visual Studio Code. Es un script SQL: se ejecuta
+en el motor de base de datos (MySQL), no en un editor de código. VS Code sirve más
+adelante para escribir los archivos PHP y el proyecto Vue, pero el `.sql` va en
+phpMyAdmin / MySQL.
+
+Pasos (con XAMPP, tal como pide la consigna):
+
+1. Abrir el panel de control de XAMPP.
+2. Iniciar los módulos **Apache** y **MySQL** (botón "Start" en cada uno).
+3. Abrir el navegador en: http://localhost/phpmyadmin
+4. Arriba a la izquierda, click en **"Nueva"** (o simplemente ir a la pestaña **SQL**
+   del panel principal, no hace falta crear la base a mano: el script ya trae
+   `CREATE DATABASE IF NOT EXISTS juego_draft`).
+5. Click en la pestaña **"Importar"** (arriba).
+6. En "Seleccionar archivo", elegir `juego_draft.sql`.
+7. Click en **"Continuar"** / **"Importar"** al final de la página.
+8. Si todo salió bien, phpMyAdmin va a mostrar un cartel verde de éxito y, en el
+   panel izquierdo, va a aparecer la base **juego_draft** con sus 8 tablas.
+
+### Alternativa: pegar el SQL directamente
+
+También podés, en vez de "Importar":
+1. Click en la pestaña **SQL** de phpMyAdmin (sin tener ninguna base seleccionada).
+2. Abrir `juego_draft.sql` con un editor de texto (Notepad, VS Code, lo que sea),
+   copiar todo el contenido.
+3. Pegarlo en el cuadro de texto de la pestaña SQL de phpMyAdmin.
+4. Click en **"Continuar"**.
+
+### Verificar que cargó bien
+
+En phpMyAdmin, entrar a la base `juego_draft` → tabla `plantel_jugadores` → pestaña
+"Examinar". Deberían aparecer 514 filas. En la tabla `jugadores` deberían aparecer 435
+filas, y en `planteles` deberían aparecer 22.
+
+## ¿Y el DER?
+
+`der_juego_draft.mermaid` es texto plano con la sintaxis de Mermaid. Para verlo como
+diagrama tenés dos opciones rápidas:
+
+- Pegar el contenido en https://mermaid.live (se renderiza al instante, y desde ahí
+  se puede exportar como PNG/SVG para adjuntar a la entrega).
+- Si usás VS Code, instalar la extensión **"Markdown Preview Mermaid Support"** (o
+  cualquier extensión de Mermaid) y abrir el archivo con la vista previa activada.
+
+## Próximo paso
+
+Cuando esto esté cargado y confirmado en phpMyAdmin, seguimos con los archivos PHP
+(`cors.php`, `conexion.php`, `sorteo.php`, `jugadores.php`, etc.) que van a vivir en
+`C:\xampp\htdocs\juego-futbol-api\`, tal como pide el PDF.
