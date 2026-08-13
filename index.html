@@ -2349,7 +2349,9 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
   renderSquad();
   updateChangeTeamBtn();
   summarySection.classList.add('hidden');
-  draftSection.classList.remove('hidden');
+  draftSection.classList.add('hidden');
+  modeSection.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
 });
 
 renderSquad();
