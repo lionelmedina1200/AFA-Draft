@@ -114,6 +114,62 @@
     border-radius:6px;
     cursor:pointer;
   }
+  .mode-select-card{
+    max-width:760px;
+  }
+  .mode-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:14px;
+  }
+  @media (max-width: 620px){
+    .mode-grid{ grid-template-columns:1fr; }
+  }
+  .mode-card{
+    background:rgba(255,255,255,0.06);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 16px;
+    display:flex;
+    flex-direction:column;
+  }
+  .mode-card h3{
+    font-family:'Oswald', 'Inter', sans-serif;
+    font-size:17px;
+    font-weight:700;
+    color:var(--white);
+    margin:0 0 8px;
+  }
+  .mode-card p{
+    font-size:13px;
+    line-height:1.5;
+    color:var(--dim);
+    margin:0 0 14px;
+    flex:1;
+  }
+  .mode-btn{
+    background:var(--gold);
+    color:var(--text-dark);
+    border:1px solid var(--gold-dim);
+    font-weight:bold;
+    font-size:13px;
+    padding:10px 16px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  #changeTeamBtn{
+    background:transparent;
+    color:var(--white);
+    border:1px solid var(--white);
+    font-weight:bold;
+    font-size:13px;
+    padding:11px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-left:10px;
+  }
+  #changeTeamBtn:disabled{ opacity:.35; cursor:not-allowed; }
   .draft-layout{
     display:grid;
     grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
@@ -154,7 +210,9 @@
   /* ---- DRAFT ---- */
   .dice-row{
     display:flex;
+    flex-wrap:wrap;
     justify-content:center;
+    align-items:center;
     margin-bottom:22px;
   }
   #rollBtn{
@@ -326,6 +384,10 @@
     color:var(--gold);
     line-height:1;
     margin:4px 0 8px;
+  }
+  .player-card .card-media-hidden{
+    color:rgba(255,255,255,0.35);
+    font-size:20px;
   }
   .player-card button{
     width:100%;
@@ -642,12 +704,14 @@
   }
   .match-penalties{
     text-align:center;
-    font-size:13px;
-    font-weight:bold;
-    color:var(--gold);
-    margin-top:8px;
-    padding-top:8px;
-    border-top:1px dashed var(--line);
+    font-size:16px;
+    font-weight:900;
+    color:var(--white);
+    background:rgba(255,255,255,0.12);
+    border:2px solid var(--gold);
+    border-radius:8px;
+    margin-top:10px;
+    padding:8px 10px;
   }
 
   #nextMatchBtn{
@@ -836,10 +900,39 @@
     </div>
   </section>
 
+  <!-- SELECCIÓN DE MODO -->
+  <section id="modeSection" class="hidden">
+    <div class="intro-card mode-select-card">
+      <h2>Elegí cómo querés jugar</h2>
+      <div class="mode-grid">
+        <div class="mode-card">
+          <h3>Clásico</h3>
+          <p>
+            Vas a ver la <strong>media y la valoración de cada jugador</strong> mientras armás tu
+            equipo, igual que en el modo normal. Elegís con toda la información a la vista.
+          </p>
+          <button class="mode-btn" data-mode="clasico">Jugar Clásico</button>
+        </div>
+        <div class="mode-card">
+          <h3>A Conocimiento</h3>
+          <p>
+            No vas a ver la media ni la valoración de cada jugador individual — solo su nombre y
+            posición. Sí vas a ver la <strong>media de tu equipo</strong> a medida que fichás
+            jugadores. Si el plantel que te sale no te convence, podés tocar
+            <strong>"Cambiar Equipo"</strong> para que salga otro al azar — pero solo tenés
+            <strong>3 cambios por partida</strong>.
+          </p>
+          <button class="mode-btn" data-mode="conocimiento">Jugar a Conocimiento</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- DRAFT -->
   <section id="draftSection" class="hidden">
     <div class="dice-row">
       <button id="rollBtn">🎲 Tirar el dado</button>
+      <button id="changeTeamBtn" class="hidden">🔁 Cambiar Equipo</button>
     </div>
 
     <div class="draft-layout">
@@ -1628,13 +1721,31 @@ let matchResults = []; // {myGoals, oppGoals, events, oppTeam}
 
 /* ---------------- DRAFT LOGIC ---------------- */
 const rollBtn = document.getElementById('rollBtn');
+const changeTeamBtn = document.getElementById('changeTeamBtn');
 const playBtn = document.getElementById('playBtn');
 const introSection = document.getElementById('introSection');
+const modeSection = document.getElementById('modeSection');
+let gameMode = 'clasico';
+let cambiosRestantes = 3;
+
 playBtn.addEventListener('click', ()=>{
   introSection.classList.add('hidden');
-  document.getElementById('draftSection').classList.remove('hidden');
+  modeSection.classList.remove('hidden');
   window.scrollTo({top:0, behavior:'smooth'});
 });
+
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    gameMode = btn.dataset.mode;
+    cambiosRestantes = 3;
+    modeSection.classList.add('hidden');
+    document.getElementById('draftSection').classList.remove('hidden');
+    changeTeamBtn.classList.toggle('hidden', gameMode !== 'conocimiento');
+    updateChangeTeamBtn();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
 const teamReveal = document.getElementById('teamReveal');
 const offerGrid = document.getElementById('offerGrid');
 const pitchSlots = document.getElementById('pitchSlots');
@@ -1738,6 +1849,7 @@ function signPlayer(player, teamLabel, teamKeyId, sourceEl){
   if(Object.keys(squad).length < FORMATION.length){
     rollBtn.disabled = false;
   }
+  updateChangeTeamBtn();
 
   if(sourceRect){
     flyToSlot(sourceRect, slot, player);
@@ -1793,6 +1905,7 @@ function rollDice(){
     teamReveal.innerHTML = '<p>Ya salieron todos los equipos campeones disponibles.</p>';
     offerGrid.innerHTML = '';
     rollBtn.disabled = true;
+    updateChangeTeamBtn();
     return;
   }
 
@@ -1819,17 +1932,19 @@ function rollDice(){
   `;
 
   rollBtn.disabled = true; // hay que elegir un jugador antes de poder tirar de nuevo
+  updateChangeTeamBtn();
 
   roster.forEach(player=>{
     const noSlot = !firstEmptySlotFor(player.pos);
     const card = document.createElement('div');
     card.className = 'player-card';
+    const showMedia = gameMode !== 'conocimiento';
     card.innerHTML = `
       <div class="card-body">
         ${avatarHtml(player)}
         <span class="pos-tag">${player.pos}</span>
-        <div class="name">${player.legend ? '<span class="star">★</span> ' : ''}${player.name}</div>
-        <div class="card-media">${player.str}</div>
+        <div class="name">${(showMedia && player.legend) ? '<span class="star">★</span> ' : ''}${player.name}</div>
+        ${showMedia ? `<div class="card-media">${player.str}</div>` : '<div class="card-media card-media-hidden">?</div>'}
       </div>
       <button ${noSlot ? 'disabled' : ''}>${noSlot ? 'Sin cupo' : 'Fichar'}</button>
     `;
@@ -1837,6 +1952,24 @@ function rollDice(){
     offerGrid.appendChild(card);
   });
 }
+
+function updateChangeTeamBtn(){
+  if(gameMode !== 'conocimiento'){
+    changeTeamBtn.classList.add('hidden');
+    return;
+  }
+  changeTeamBtn.classList.remove('hidden');
+  const teamOffered = rollBtn.disabled && Object.keys(squad).length < FORMATION.length;
+  changeTeamBtn.disabled = !teamOffered || cambiosRestantes <= 0;
+  changeTeamBtn.textContent = `🔁 Cambiar Equipo (${cambiosRestantes})`;
+}
+
+changeTeamBtn.addEventListener('click', ()=>{
+  if(gameMode !== 'conocimiento' || cambiosRestantes <= 0) return;
+  cambiosRestantes--;
+  rollDice();
+  updateChangeTeamBtn();
+});
 
 rollBtn.addEventListener('click', rollDice);
 
@@ -1885,6 +2018,10 @@ function eliminateTournament(stageIndex, message){
 }
 
 function handlePhaseTransition(stageIndex, result){
+  const penaltyNote = result.penalties
+    ? ` (definido por penales ${result.penalties.my}-${result.penalties.opp})`
+    : '';
+
   // fin de la fase de grupos: se necesitan más de 4 puntos para pasar
   if(stageIndex === 2){
     const pts = groupPoints();
@@ -1901,19 +2038,19 @@ function handlePhaseTransition(stageIndex, result){
   if(stageIndex >= 3){
     const won = matchWon(result);
     if(!won){
-      eliminateTournament(stageIndex, `Quedaste eliminado en ${STAGES[stageIndex]}.`);
+      eliminateTournament(stageIndex, `Quedaste eliminado en ${STAGES[stageIndex]}${penaltyNote}.`);
       return;
     }
     if(stageIndex === 6){
       nextMatchBtn.classList.add('hidden');
       launchConfetti(160);
       setTimeout(()=> launchConfetti(140), 500);
-      showPhaseModal('🏆 ¡Campeón!', '¡Ganaste la Final! Sos el campeón del Mundialito 7–0.', ()=> showSummary(), true, true);
+      showPhaseModal('🏆 ¡Campeón!', `¡Ganaste la Final${penaltyNote}! Sos el campeón del Mundialito 7–0.`, ()=> showSummary(), true, true);
       return;
     }
     const NEXT_STAGE_NAME = {3:'Cuartos de Final', 4:'Semifinal', 5:'la Final'};
     finishMatchReveal(stageIndex);
-    showPhaseModal('¡Felicidades!', `Pasaste a ${NEXT_STAGE_NAME[stageIndex]}.`, null);
+    showPhaseModal('¡Felicidades!', `Pasaste a ${NEXT_STAGE_NAME[stageIndex]}${penaltyNote}.`, null);
     return;
   }
 
@@ -2131,14 +2268,18 @@ function playNextMatch(){
     setTimeout(revealNext, delay);
   }
   function revealPenalties(){
-    if(result.penalties){
-      card.querySelector(`#penalties-${stageIndex}`).innerHTML = penaltiesLine;
-    }
     const won = result.penalties
       ? result.penalties.my > result.penalties.opp
       : result.myGoals > result.oppGoals;
-    if(won) launchConfetti(70);
-    handlePhaseTransition(stageIndex, result);
+
+    if(result.penalties){
+      card.querySelector(`#penalties-${stageIndex}`).innerHTML = penaltiesLine;
+      if(won) launchConfetti(70);
+      setTimeout(()=> handlePhaseTransition(stageIndex, result), 1400); // pausa para leer el resultado de los penales
+    }else{
+      if(won) launchConfetti(70);
+      handlePhaseTransition(stageIndex, result);
+    }
   }
   setTimeout(()=>{
     if(result.events.length === 0){
@@ -2199,12 +2340,14 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
   usedRivals = new Set();
   matchResults = [];
   eliminationMessage = null;
+  cambiosRestantes = 3;
   matchesLog.innerHTML = '';
   offerGrid.innerHTML = '';
   teamReveal.innerHTML = '';
   rollBtn.disabled = false;
   nextMatchBtn.classList.remove('hidden');
   renderSquad();
+  updateChangeTeamBtn();
   summarySection.classList.add('hidden');
   draftSection.classList.remove('hidden');
 });
