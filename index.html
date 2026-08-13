@@ -52,7 +52,10 @@
     color:var(--gold);
     border:1px solid var(--gold-dim);
     padding:2px 14px;
+    cursor:pointer;
+    transition:opacity .15s ease, transform .15s ease;
   }
+  .scoreboard:hover{ opacity:0.8; transform:scale(1.03); }
   h1{
     margin:12px 0 4px;
     font-size:19px;
@@ -2339,7 +2342,7 @@ function showSummary(){
   }
 }
 
-document.getElementById('restartBtn').addEventListener('click', ()=>{
+function resetGameState(){
   squad = {};
   signedNames = new Set();
   usedTeams = new Set();
@@ -2354,9 +2357,23 @@ document.getElementById('restartBtn').addEventListener('click', ()=>{
   nextMatchBtn.classList.remove('hidden');
   renderSquad();
   updateChangeTeamBtn();
+}
+
+document.getElementById('restartBtn').addEventListener('click', ()=>{
+  resetGameState();
   summarySection.classList.add('hidden');
   draftSection.classList.add('hidden');
   modeSection.classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('scoreboard').addEventListener('click', ()=>{
+  resetGameState();
+  modeSection.classList.add('hidden');
+  draftSection.classList.add('hidden');
+  tournamentSection.classList.add('hidden');
+  summarySection.classList.add('hidden');
+  introSection.classList.remove('hidden');
   window.scrollTo({top:0, behavior:'smooth'});
 });
 
