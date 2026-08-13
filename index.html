@@ -740,6 +740,11 @@
     color:var(--white);
     box-shadow:0 10px 24px rgba(0,0,0,0.35);
   }
+  .summary-team{
+    max-width:420px;
+    margin:26px auto 0;
+    text-align:center;
+  }
   .summary .big-score{
     font-family:'Courier New', monospace;
     font-size:44px;
@@ -989,6 +994,31 @@
       <div class="big-score" id="finalScore">0-0-0</div>
       <div class="verdict" id="finalVerdict"></div>
       <button id="restartBtn">Volver a jugar</button>
+    </div>
+
+    <div class="summary-team">
+      <p class="section-title">Tu Once</p>
+      <div class="team-media">
+        <div class="team-media-label">Media del equipo</div>
+        <div class="team-media-value" id="summaryMediaValue">--</div>
+        <div class="team-media-count" id="summaryMediaCount">0/11 jugadores</div>
+        <div class="team-stars" id="summaryStars"></div>
+      </div>
+      <div class="pitch-wrap">
+        <div class="pitch" id="summaryPitch">
+          <svg class="pitch-lines" viewBox="0 0 100 150" preserveAspectRatio="none">
+            <rect x="1" y="1" width="98" height="148" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <line x1="1" y1="75" x2="99" y2="75" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <circle cx="50" cy="75" r="12" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <circle cx="50" cy="75" r="0.8" fill="rgba(255,255,255,0.6)"/>
+            <rect x="22" y="1" width="56" height="20" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <rect x="36" y="1" width="28" height="8" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <rect x="22" y="129" width="56" height="20" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+            <rect x="36" y="141" width="28" height="8" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="0.6"/>
+          </svg>
+          <div id="summaryPitchSlots"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1780,6 +1810,35 @@ function starsHtml(ratingOutOf5){
   `;
 }
 
+function renderSummarySquad(){
+  const slotsEl = document.getElementById('summaryPitchSlots');
+  slotsEl.innerHTML = '';
+  FORMATION.forEach(slot=>{
+    const p = squad[slot.id];
+    const div = document.createElement('div');
+    div.className = 'pitch-slot' + (p ? ' filled' : '');
+    div.style.left = slot.x + '%';
+    div.style.top = slot.y + '%';
+    div.innerHTML = `
+      <div class="slot-pos">${slot.pos}</div>
+      ${p ? `<div class="slot-name">${p.name.split(' ').slice(-1)[0]}</div><div class="slot-str">${p.str}</div>` : ''}
+    `;
+    slotsEl.appendChild(div);
+  });
+
+  const players = Object.values(squad);
+  const filled = players.length;
+  const media = filled > 0 ? Math.round(players.reduce((s,p)=>s+p.str,0)/filled) : null;
+  document.getElementById('summaryMediaValue').textContent = media !== null ? media : '--';
+  document.getElementById('summaryMediaCount').textContent = `${filled}/11 jugadores`;
+
+  const ratingOutOf5 = media !== null ? (media / 20) : 0;
+  document.getElementById('summaryStars').innerHTML = `
+    ${starsHtml(ratingOutOf5)}
+    <div class="stars-score">${media !== null ? ratingOutOf5.toFixed(1) : '0.0'} / 5</div>
+  `;
+}
+
 function renderSquad(){
   pitchSlots.innerHTML = '';
   FORMATION.forEach(slot=>{
@@ -2300,6 +2359,7 @@ startBtn.addEventListener('click', startTournament);
 function showSummary(){
   tournamentSection.classList.add('hidden');
   summarySection.classList.remove('hidden');
+  renderSummarySquad();
 
   let wins=0, draws=0, losses=0, gf=0, ga=0, penaltyWins=0;
   matchResults.forEach(r=>{
