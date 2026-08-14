@@ -2076,14 +2076,14 @@ function handlePhaseTransition(stageIndex, result){
     ? ` (definido por penales ${result.penalties.my}-${result.penalties.opp})`
     : '';
 
-  // fin de la fase de grupos: se necesitan más de 4 puntos para pasar
+  // fin de la fase de grupos: se necesitan 4 puntos o más para pasar
   if(stageIndex === 2){
     const pts = groupPoints();
-    if(pts > 4){
+    if(pts >= 4){
       finishMatchReveal(stageIndex);
       showPhaseModal('¡Felicidades!', `Pasaste a Octavos de Final con ${pts} puntos en la fase de grupos.`, null);
     }else{
-      eliminateTournament(stageIndex, `No alcanzaste los puntos necesarios en la fase de grupos (${pts} puntos, se necesitan más de 4). Quedaste eliminado.`);
+      eliminateTournament(stageIndex, `No alcanzaste los puntos necesarios en la fase de grupos (${pts} puntos, se necesitan 4 o más). Quedaste eliminado.`);
     }
     return;
   }
@@ -2204,14 +2204,15 @@ function simulateMatch(myStr, oppStr){
   // "Factor del día": cada equipo puede rendir mejor o peor que su media en
   // un partido puntual (lesiones, presión, un golazo, un error puntual, etc).
   // Así la media pesa, pero no es lo único que decide el resultado.
-  const myForm = myStr + (Math.random()*22 - 11);   // +/- 11 puntos de variación
-  const oppForm = oppStr + (Math.random()*22 - 11);
+  const myForm = myStr + (Math.random()*20 - 10);   // +/- 10 puntos de variación
+  const oppForm = oppStr + (Math.random()*20 - 10);
 
   let diff = myForm - oppForm;
-  diff = clamp(diff, -22, 22); // se limita cuánto puede pesar la diferencia
+  diff = clamp(diff, -20, 20); // se limita cuánto puede pesar la diferencia
 
-  const expMy = clamp(1.35 + diff/28, 0.25, 4.2);
-  const expOpp = clamp(1.1 - diff/32, 0.2, 3.6);
+  // Base pareja para ambos equipos: con la misma media, las chances son las mismas.
+  const expMy = clamp(1.15 + diff/32, 0.2, 3.6);
+  const expOpp = clamp(1.15 - diff/32, 0.2, 3.6);
   const myGoals = poisson(expMy);
   const oppGoals = poisson(expOpp);
 
