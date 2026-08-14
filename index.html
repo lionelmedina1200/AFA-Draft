@@ -902,7 +902,7 @@
         <li>Elegís <strong>un solo jugador</strong> de ese plantel para tu formación 4-3-3.</li>
         <li>Repetís hasta completar los 11 puestos (cada plantel sale una sola vez).</li>
         <li>Con el equipo armado, arrancás el Mundialito y vas jugando fase por fase.</li>
-        <li>¡Buscá el 7–0 perfecto!</li>
+        <li>¡Buscá el Título Invicto!</li>
       </ol>
       <button id="playBtn">▶️ Jugar</button>
     </div>
@@ -2099,7 +2099,7 @@ function handlePhaseTransition(stageIndex, result){
       nextMatchBtn.classList.add('hidden');
       launchConfetti(160);
       setTimeout(()=> launchConfetti(140), 500);
-      showPhaseModal('🏆 ¡Campeón!', `¡Ganaste la Final${penaltyNote}! Sos el campeón del Mundialito 7–0.`, ()=> showSummary(), true, true);
+      showPhaseModal('🏆 ¡Campeón!', `¡Ganaste la Final${penaltyNote}! Sos el campeón del Mundialito.`, ()=> showSummary(), true, true);
       return;
     }
     const NEXT_STAGE_NAME = {3:'Cuartos de Final', 4:'Semifinal', 5:'la Final'};
@@ -2378,12 +2378,12 @@ function showSummary(){
   const verdict = document.getElementById('finalVerdict');
   const penaltyNote = penaltyWins > 0 ? ` (${penaltyWins} definido${penaltyWins>1?'s':''} por penales)` : '';
   if(wins === 7 && ga === 0){
-    verdict.innerHTML = `¡7–0 PERFECTO! Campeón invicto y sin recibir goles${penaltyNote}.<br>Goles a favor: ${gf}`;
+    verdict.innerHTML = `¡TÍTULO INVICTO! Campeón invicto y sin recibir goles${penaltyNote}.<br>Goles a favor: ${gf}`;
     verdict.classList.add('perfect');
   }else if(eliminationMessage){
     verdict.textContent = `${eliminationMessage} (${wins}G ${draws}E ${losses}P, ${gf}-${ga})${penaltyNote}.`;
   }else if(losses === 0){
-    verdict.textContent = `Campeón invicto, con ${ga} goles recibidos${penaltyNote}. Muy cerca del 7–0.`;
+    verdict.textContent = `Campeón invicto, con ${ga} goles recibidos${penaltyNote}. Muy cerca del Título Invicto.`;
   }else{
     verdict.textContent = `Terminaste con ${wins} victorias, ${draws} empates y ${losses} derrotas (${gf}-${ga})${penaltyNote}. ¡Vuelve a intentarlo!`;
   }
