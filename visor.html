@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AFA Draft · Visor de Ranking</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0d1f38;
+    --bg2:#16345c;
+    --line:rgba(255,255,255,0.4);
+    --white:#ffffff;
+    --dim:rgba(255,255,255,0.75);
+    --gold:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:linear-gradient(180deg, #0b1830 0%, #12294c 45%, #0d2038 100%);
+    color:var(--white);
+    font-family:'Inter', Arial, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .card{
+    width:100%;
+    max-width:520px;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:28px 26px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  }
+  h1{
+    font-family:'Oswald', 'Inter', sans-serif;
+    font-size:22px;
+    text-align:center;
+    margin:0 0 4px;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:13px;
+    color:var(--dim);
+    margin:0 0 20px;
+  }
+  .estado{
+    text-align:center;
+    font-size:12px;
+    color:var(--dim);
+    margin-bottom:14px;
+  }
+  .estado.en-vivo::before{
+    content:'● ';
+    color:#5fd37b;
+  }
+  .ranking-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 6px;
+    border-bottom:1px solid var(--line);
+    font-size:15px;
+  }
+  .ranking-row:last-child{ border-bottom:none; }
+  .ranking-pos{ width:24px; text-align:right; color:var(--dim); font-weight:700; }
+  .ranking-alias{ flex:1; }
+  .ranking-puntos{ font-weight:700; }
+  .ranking-empty{
+    text-align:center;
+    color:var(--dim);
+    font-size:13px;
+    padding:20px 0;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>🏆 AFA Draft</h1>
+    <p class="subtitle">Ranking en vivo del Mundialito</p>
+    <p class="estado" id="estado">conectando...</p>
+    <div id="rankingList"></div>
+  </div>
+
+<script>
+  // Mismo proyecto de Supabase que usa AFA Draft. La clave "anon" es
+  // pública por diseño: solo permite lo que las políticas RLS habilitan
+  // (acá, leer el ranking — nada de escribir ni de datos privados).
+  const SUPABASE_URL = 'https://iegbrckivqvysyglnyct.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllZ2JyY2tpdnF2eXN5Z2xueWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDUyMTAsImV4cCI6MjEwNzQ4MTIxMH0.ejsvYOXS-KsIXn1kOw8jLloee9DSGqT6AoPvXiuLD58';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const JUEGO_ID = 1;
+
+  const estadoEl = document.getElementById('estado');
+  const listaEl = document.getElementById('rankingList');
+
+  async function cargarRanking(){
+    const { data, error } = await sb
+      .from('partidas')
+      .select('puntos, creado_en, perfiles(alias)')
+      .eq('juego_id', JUEGO_ID)
+      .order('puntos', { ascending:false })
+      .order('creado_en', { ascending:true })
+      .limit(20);
+
+    if(error){
+      listaEl.innerHTML = '<p class="ranking-empty">No se pudo cargar el ranking.</p>';
+      return;
+    }
+    if(!data || data.length === 0){
+      listaEl.innerHTML = '<p class="ranking-empty">Todavía no hay resultados.</p>';
+      return;
+    }
+    listaEl.innerHTML = data.map((fila, i) => `
+      <div class="ranking-row">
+        <span class="ranking-pos">${i+1}</span>
+        <span class="ranking-alias">${(fila.perfiles && fila.perfiles.alias) || 'Jugador'}</span>
+        <span class="ranking-puntos">${fila.puntos} pts</span>
+      </div>
+    `).join('');
+  }
+
+  sb.channel('visor-ranking')
+    .on('postgres_changes', { event:'*', schema:'public', table:'partidas', filter:`juego_id=eq.${JUEGO_ID}` }, () => {
+      cargarRanking();
+    })
+    .subscribe((status) => {
+      if(status === 'SUBSCRIBED'){
+        estadoEl.textContent = 'en vivo — se actualiza solo';
+        estadoEl.classList.add('en-vivo');
+      }
+    });
+
+  cargarRanking();
+</script>
+</body>
+</html>
