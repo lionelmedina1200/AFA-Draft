@@ -123,6 +123,8 @@
     `).join('');
   }
 
+  let yaEstuvoConectado = false;
+
   sb.channel('visor-ranking')
     .on('postgres_changes', { event:'*', schema:'public', table:'partidas', filter:`juego_id=eq.${JUEGO_ID}` }, () => {
       cargarRanking();
@@ -131,6 +133,13 @@
       if(status === 'SUBSCRIBED'){
         estadoEl.textContent = 'en vivo — se actualiza solo';
         estadoEl.classList.add('en-vivo');
+        // Si ya habíamos estado conectados antes y se cortó, al reconectar
+        // volvemos a pedir el ranking por si nos perdimos algún aviso.
+        if(yaEstuvoConectado) cargarRanking();
+        yaEstuvoConectado = true;
+      } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){
+        estadoEl.textContent = 'Reconectando…';
+        estadoEl.classList.remove('en-vivo');
       }
     });
 

@@ -292,6 +292,16 @@
     text-align:center;
     padding:14px 0;
   }
+  .estado-ranking{
+    text-align:center;
+    font-size:11px;
+    color:var(--dim);
+    margin:0 0 10px;
+  }
+  .estado-ranking.en-vivo::before{
+    content:'● ';
+    color:#5fd37b;
+  }
   #backFromRankingBtn{
     display:block;
     margin:24px auto 0;
@@ -1061,6 +1071,7 @@
   <section id="rankingSection" class="hidden">
     <div class="intro-card">
       <h2>🏆 Ranking de AFA Draft</h2>
+      <p class="estado-ranking" id="rankingEstado"></p>
       <div id="rankingList"></div>
       <button id="backFromRankingBtn">← Volver</button>
     </div>
@@ -1374,11 +1385,26 @@ async function cargarRanking(){
   }
 }
 
+let rankingYaConectado = false;
+const rankingEstadoEl = document.getElementById('rankingEstado');
+
 sb.channel('ranking-partidas')
   .on('postgres_changes', { event:'*', schema:'public', table:'partidas', filter:`juego_id=eq.${JUEGO_ID}` }, ()=>{
     if(!rankingSection.classList.contains('hidden')) cargarRanking();
   })
-  .subscribe();
+  .subscribe((status)=>{
+    if(status === 'SUBSCRIBED'){
+      rankingEstadoEl.textContent = 'en vivo — se actualiza solo';
+      rankingEstadoEl.classList.add('en-vivo');
+      // Si se había cortado y volvió a conectar, repedimos el ranking
+      // por si nos perdimos algún aviso mientras estuvo desconectado.
+      if(rankingYaConectado && !rankingSection.classList.contains('hidden')) cargarRanking();
+      rankingYaConectado = true;
+    } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){
+      rankingEstadoEl.textContent = 'Reconectando…';
+      rankingEstadoEl.classList.remove('en-vivo');
+    }
+  });
 
 async function guardarResultadoPartida(puntos, duracionSegundos){
   if(!currentUser) return;
