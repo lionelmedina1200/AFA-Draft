@@ -2801,10 +2801,11 @@ function showSummary(){
     verdict.textContent = `Terminaste con ${wins} victorias, ${draws} empates y ${losses} derrotas (${gf}-${ga})${penaltyNote}. ¡Vuelve a intentarlo!`;
   }
 
-  // Puntaje para el ranking: puntos de liga (3 por victoria, 1 por empate)
-  // + un extra por diferencia de gol + bonus si fue Título Invicto.
-  const tituloInvicto = (wins === 7 && ga === 0);
-  const puntosFinal = Math.max(0, wins*3 + draws + (gf - ga) + (tituloInvicto ? 10 : 0));
+  // Puntaje para el ranking: 3 puntos por cada partido ganado,
+  // 1 por cada empate, 0 por derrota. Si ganaste los 7 partidos
+  // (saliste campeón) se suman 10 puntos extra al final.
+  const esCampeon = (wins === 7);
+  const puntosFinal = wins*3 + draws*1 + (esCampeon ? 10 : 0);
   const duracionSegundos = tournamentStartTime
     ? Math.round((Date.now() - tournamentStartTime) / 1000)
     : null;
