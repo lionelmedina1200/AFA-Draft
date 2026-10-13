@@ -241,21 +241,32 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:14px;
+    gap:10px;
     font-size:13px;
     color:var(--dim);
-    margin-top:8px;
+    margin-top:10px;
     flex-wrap:wrap;
   }
   .user-bar strong{ color:var(--white); }
   .user-bar button{
-    background:transparent;
+    font-family:inherit;
+    font-weight:700;
+    font-size:12.5px;
+    padding:7px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .user-bar button:hover{ opacity:0.85; transform:scale(1.03); }
+  #rankingBtn{
+    background:var(--gold);
+    color:var(--text-dark);
+    border:1px solid var(--gold-dim);
+  }
+  #logoutBtn{
+    background:rgba(255,255,255,0.08);
     color:var(--white);
     border:1px solid var(--line);
-    font-size:12px;
-    padding:5px 12px;
-    border-radius:6px;
-    cursor:pointer;
   }
   .ranking-row{
     display:flex;
@@ -755,15 +766,31 @@
 
   #startBtn{
     display:block;
-    margin:26px auto 0;
+    width:100%;
+    margin:20px 0 0;
     background:var(--gold);
     color:var(--text-dark);
     border:1px solid var(--gold-dim);
     font-weight:bold;
     font-size:15px;
-    padding:12px 26px;
-    border-radius:4px;
+    padding:14px 20px;
+    border-radius:8px;
     cursor:pointer;
+    transition:opacity .15s ease, transform .15s ease, box-shadow .2s ease;
+  }
+  #startBtn:disabled{
+    opacity:0.4;
+    cursor:default;
+  }
+  #startBtn:not(:disabled){
+    box-shadow:0 6px 18px rgba(255,255,255,0.18);
+  }
+  #startBtn:not(:disabled):hover{
+    opacity:0.9;
+    transform:scale(1.02);
+  }
+  @media (max-width: 880px){
+    #startBtn{ margin-top:18px; }
   }
   #startBtn:disabled{ opacity:.35; cursor:not-allowed; }
 
@@ -1142,6 +1169,7 @@
         <div class="offer-scroll">
           <div class="offer-grid" id="offerGrid"></div>
         </div>
+        <button id="startBtn" disabled>Comenzar el Mundialito</button>
       </div>
 
       <div class="draft-right">
@@ -1169,8 +1197,6 @@
         </div>
       </div>
     </div>
-
-    <button id="startBtn" disabled>Comenzar el Mundialito</button>
   </section>
 
   <!-- TOURNAMENT -->
@@ -1352,9 +1378,11 @@ document.getElementById('backFromRankingBtn').addEventListener('click', ()=>{
 async function cargarRanking(){
   const lista = document.getElementById('rankingList');
   lista.innerHTML = '<p class="ranking-empty">Cargando...</p>';
+  // Lee de "ranking_mejor": una vista que ya trae un solo resultado por
+  // jugador (el mejor puntaje de cada uno), en vez de todas sus partidas.
   const { data, error } = await sb
-    .from('partidas')
-    .select('id, puntos, creado_en, perfiles(alias)')
+    .from('ranking_mejor')
+    .select('partida_id, puntos, creado_en, alias')
     .eq('juego_id', JUEGO_ID)
     .order('puntos', { ascending:false })
     .order('creado_en', { ascending:true })
@@ -1367,9 +1395,9 @@ async function cargarRanking(){
   lista.innerHTML = data.map((fila, i)=>`
     <div class="ranking-row">
       <span class="ranking-pos">${i+1}</span>
-      <span class="ranking-alias">${(fila.perfiles && fila.perfiles.alias) || 'Jugador'}</span>
+      <span class="ranking-alias">${fila.alias || 'Jugador'}</span>
       <span class="ranking-puntos">${fila.puntos} pts</span>
-      ${esAdmin ? `<button class="ranking-del" data-id="${fila.id}">Quitar</button>` : ''}
+      ${esAdmin ? `<button class="ranking-del" data-id="${fila.partida_id}">Quitar</button>` : ''}
     </div>
   `).join('');
 

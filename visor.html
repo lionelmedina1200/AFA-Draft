@@ -98,9 +98,10 @@
   const listaEl = document.getElementById('rankingList');
 
   async function cargarRanking(){
+    // "ranking_mejor" ya trae un solo resultado por jugador (su mejor puntaje).
     const { data, error } = await sb
-      .from('partidas')
-      .select('puntos, creado_en, perfiles(alias)')
+      .from('ranking_mejor')
+      .select('puntos, creado_en, alias')
       .eq('juego_id', JUEGO_ID)
       .order('puntos', { ascending:false })
       .order('creado_en', { ascending:true })
@@ -117,7 +118,7 @@
     listaEl.innerHTML = data.map((fila, i) => `
       <div class="ranking-row">
         <span class="ranking-pos">${i+1}</span>
-        <span class="ranking-alias">${(fila.perfiles && fila.perfiles.alias) || 'Jugador'}</span>
+        <span class="ranking-alias">${fila.alias || 'Jugador'}</span>
         <span class="ranking-puntos">${fila.puntos} pts</span>
       </div>
     `).join('');
