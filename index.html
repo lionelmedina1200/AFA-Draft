@@ -21,7 +21,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg:#0d1f38;
@@ -173,155 +172,6 @@
     font-weight:bold;
     font-size:13px;
     padding:10px 16px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  .auth-tabs{
-    display:flex;
-    gap:8px;
-    margin-bottom:16px;
-  }
-  .auth-tab{
-    flex:1;
-    background:rgba(255,255,255,0.06);
-    color:var(--dim);
-    border:1px solid var(--line);
-    font-weight:600;
-    font-size:13px;
-    padding:9px 10px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  .auth-tab.active{
-    background:var(--gold);
-    color:var(--text-dark);
-    border-color:var(--gold-dim);
-  }
-  .auth-field{
-    display:block;
-    margin-bottom:12px;
-  }
-  .auth-field label{
-    display:block;
-    font-size:12px;
-    color:var(--dim);
-    margin-bottom:4px;
-  }
-  .auth-field input{
-    width:100%;
-    padding:10px 12px;
-    border-radius:6px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,0.08);
-    color:var(--white);
-    font-size:14px;
-    font-family:inherit;
-  }
-  .auth-error{
-    color:var(--red);
-    font-size:13px;
-    margin:0 0 10px;
-    min-height:1px;
-  }
-  #authSubmitBtn{
-    display:block;
-    width:100%;
-    margin-top:6px;
-    background:var(--gold);
-    color:var(--text-dark);
-    border:1px solid var(--gold-dim);
-    font-weight:bold;
-    font-size:15px;
-    padding:12px 34px;
-    border-radius:6px;
-    cursor:pointer;
-  }
-  #authSubmitBtn:disabled{ opacity:0.6; cursor:default; }
-  .user-bar{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:10px;
-    font-size:13px;
-    color:var(--dim);
-    margin-top:10px;
-    flex-wrap:wrap;
-  }
-  .user-bar strong{ color:var(--white); }
-  .user-bar button{
-    font-family:inherit;
-    font-weight:700;
-    font-size:12.5px;
-    padding:7px 16px;
-    border-radius:20px;
-    cursor:pointer;
-    transition:opacity .15s ease, transform .15s ease;
-  }
-  .user-bar button:hover{ opacity:0.85; transform:scale(1.03); }
-  #rankingBtn{
-    background:var(--gold);
-    color:var(--text-dark);
-    border:1px solid var(--gold-dim);
-  }
-  #logoutBtn{
-    background:rgba(255,255,255,0.08);
-    color:var(--white);
-    border:1px solid var(--line);
-  }
-  .ranking-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:9px 10px;
-    border-bottom:1px solid var(--line);
-    font-size:14px;
-  }
-  .ranking-row:last-child{ border-bottom:none; }
-  .ranking-pos{
-    width:22px;
-    text-align:right;
-    color:var(--dim);
-    font-weight:700;
-  }
-  .ranking-alias{ flex:1; color:var(--white); }
-  .ranking-puntos{
-    font-weight:700;
-    color:var(--gold);
-  }
-  .ranking-del{
-    background:transparent;
-    color:var(--red);
-    border:1px solid var(--red);
-    font-size:11px;
-    padding:3px 8px;
-    border-radius:5px;
-    cursor:pointer;
-  }
-  .ranking-empty{
-    color:var(--dim);
-    font-size:13px;
-    text-align:center;
-    padding:14px 0;
-  }
-  .estado-ranking{
-    text-align:center;
-    font-size:11px;
-    color:var(--dim);
-    margin:0 0 10px;
-  }
-  .estado-ranking.en-vivo::before{
-    content:'● ';
-    color:#5fd37b;
-  }
-  #backFromRankingBtn{
-    display:block;
-    margin:24px auto 0;
-    background:transparent;
-    color:var(--white);
-    border:1px solid var(--line);
-    font-weight:600;
-    font-size:13px;
-    padding:10px 20px;
     border-radius:6px;
     cursor:pointer;
   }
@@ -1061,51 +911,12 @@
 <header>
   <div class="scoreboard" id="scoreboard">AFA</div>
   <h1>AFA Draft · Arma tu equipo de ensueño</h1>
-  <div class="user-bar hidden" id="userBar">
-    <span>Jugando como <strong id="userAlias"></strong></span>
-    <button id="rankingBtn">🏆 Ranking</button>
-    <button id="logoutBtn">Salir</button>
-  </div>
 </header>
 
 <main>
 
-  <!-- LOGIN / REGISTRO -->
-  <section id="authSection">
-    <div class="intro-card">
-      <h2>Ingresá para jugar</h2>
-      <p style="margin-bottom:16px;">
-        Tus resultados se guardan en un ranking compartido. Necesitás una cuenta para jugar.
-      </p>
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab active" id="authTabLogin">Ingresar</button>
-        <button type="button" class="auth-tab" id="authTabRegister">Registrarme</button>
-      </div>
-      <p class="auth-error" id="authError"></p>
-      <div class="auth-field">
-        <label for="authAlias">Alias</label>
-        <input type="text" id="authAlias" autocomplete="username" maxlength="24" placeholder="Tu nombre de jugador">
-      </div>
-      <div class="auth-field">
-        <label for="authPassword">Contraseña</label>
-        <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••">
-      </div>
-      <button id="authSubmitBtn">Ingresar</button>
-    </div>
-  </section>
-
-  <!-- RANKING -->
-  <section id="rankingSection" class="hidden">
-    <div class="intro-card">
-      <h2>🏆 Ranking de AFA Draft</h2>
-      <p class="estado-ranking" id="rankingEstado"></p>
-      <div id="rankingList"></div>
-      <button id="backFromRankingBtn">← Volver</button>
-    </div>
-  </section>
-
   <!-- INTRO -->
-  <section id="introSection" class="hidden">
+  <section id="introSection">
     <div class="intro-card">
       <h2>¿De qué se trata?</h2>
       <p>
@@ -1251,199 +1062,6 @@
 </div>
 
 <script>
-/* ---------------- SUPABASE ---------------- */
-const SUPABASE_URL = 'https://iegbrckivqvysyglnyct.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllZ2JyY2tpdnF2eXN5Z2xueWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDUyMTAsImV4cCI6MjEwNzQ4MTIxMH0.ejsvYOXS-KsIXn1kOw8jLloee9DSGqT6AoPvXiuLD58';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const JUEGO_ID = 1; // fila fija de la tabla "juegos" para AFA Draft
-
-let currentUser = null;   // { id, email }
-let currentPerfil = null; // { id, alias, rol }
-let authMode = 'login';   // 'login' | 'register'
-let tournamentStartTime = null;
-
-const authSection = document.getElementById('authSection');
-const rankingSection = document.getElementById('rankingSection');
-const userBar = document.getElementById('userBar');
-const userAliasEl = document.getElementById('userAlias');
-const authTabLogin = document.getElementById('authTabLogin');
-const authTabRegister = document.getElementById('authTabRegister');
-const authAliasInput = document.getElementById('authAlias');
-const authPasswordInput = document.getElementById('authPassword');
-const authError = document.getElementById('authError');
-const authSubmitBtn = document.getElementById('authSubmitBtn');
-
-function aliasToEmail(alias){
-  // Supabase Auth pide un email; usamos un dominio ficticio fijo
-  // para poder loguear a la gente solo con alias + contraseña.
-  return `${alias.trim().toLowerCase().replace(/[^a-z0-9_.-]/g,'')}@afadraft.local`;
-}
-
-function setAuthMode(mode){
-  authMode = mode;
-  authTabLogin.classList.toggle('active', mode === 'login');
-  authTabRegister.classList.toggle('active', mode === 'register');
-  authSubmitBtn.textContent = mode === 'login' ? 'Ingresar' : 'Registrarme';
-  authError.textContent = '';
-}
-authTabLogin.addEventListener('click', ()=> setAuthMode('login'));
-authTabRegister.addEventListener('click', ()=> setAuthMode('register'));
-
-authSubmitBtn.addEventListener('click', async ()=>{
-  const alias = authAliasInput.value.trim();
-  const password = authPasswordInput.value;
-  authError.textContent = '';
-
-  if(alias.length < 3){
-    authError.textContent = 'El alias tiene que tener al menos 3 caracteres.';
-    return;
-  }
-  if(password.length < 6){
-    authError.textContent = 'La contraseña tiene que tener al menos 6 caracteres.';
-    return;
-  }
-
-  authSubmitBtn.disabled = true;
-  const email = aliasToEmail(alias);
-
-  try{
-    if(authMode === 'register'){
-      const { data, error } = await sb.auth.signUp({
-        email, password,
-        options: { data: { alias } }
-      });
-      if(error) throw error;
-      if(!data.session){
-        authError.textContent = 'Cuenta creada. Si pide confirmar el mail, desactivá esa opción en Supabase (Authentication → Providers → Email) para este proyecto escolar.';
-      }
-    } else {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if(error) throw error;
-    }
-    await refreshSession();
-  }catch(err){
-    authError.textContent = traducirErrorAuth(err.message);
-  }finally{
-    authSubmitBtn.disabled = false;
-  }
-});
-
-function traducirErrorAuth(msg){
-  if(/already registered|already exists/i.test(msg)) return 'Ese alias ya está en uso.';
-  if(/Invalid login credentials/i.test(msg)) return 'Alias o contraseña incorrectos.';
-  return msg;
-}
-
-async function refreshSession(){
-  const { data: { user } } = await sb.auth.getUser();
-  currentUser = user || null;
-  if(!currentUser){
-    currentPerfil = null;
-    authSection.classList.remove('hidden');
-    userBar.classList.add('hidden');
-    introSection.classList.add('hidden');
-    return;
-  }
-  const { data: perfil } = await sb.from('perfiles').select('id, alias, rol').eq('id', currentUser.id).single();
-  currentPerfil = perfil || null;
-  authSection.classList.add('hidden');
-  userBar.classList.remove('hidden');
-  userAliasEl.textContent = currentPerfil ? currentPerfil.alias : '...';
-  introSection.classList.remove('hidden');
-}
-
-document.getElementById('logoutBtn').addEventListener('click', async ()=>{
-  await sb.auth.signOut();
-  rankingSection.classList.add('hidden');
-  introSection.classList.add('hidden');
-  document.getElementById('modeSection').classList.add('hidden');
-  await refreshSession();
-});
-
-/* ---------------- RANKING ---------------- */
-document.getElementById('rankingBtn').addEventListener('click', async ()=>{
-  [introSection, document.getElementById('modeSection'), document.getElementById('draftSection'),
-   document.getElementById('tournamentSection'), document.getElementById('summarySection')]
-    .forEach(s=> s.classList.add('hidden'));
-  rankingSection.classList.remove('hidden');
-  await cargarRanking();
-  window.scrollTo({top:0, behavior:'smooth'});
-});
-document.getElementById('backFromRankingBtn').addEventListener('click', ()=>{
-  rankingSection.classList.add('hidden');
-  introSection.classList.remove('hidden');
-  window.scrollTo({top:0, behavior:'smooth'});
-});
-
-async function cargarRanking(){
-  const lista = document.getElementById('rankingList');
-  lista.innerHTML = '<p class="ranking-empty">Cargando...</p>';
-  // Lee de "ranking_mejor": una vista que ya trae un solo resultado por
-  // jugador (el mejor puntaje de cada uno), en vez de todas sus partidas.
-  const { data, error } = await sb
-    .from('ranking_mejor')
-    .select('partida_id, puntos, creado_en, alias')
-    .eq('juego_id', JUEGO_ID)
-    .order('puntos', { ascending:false })
-    .order('creado_en', { ascending:true })
-    .limit(20);
-
-  if(error){ lista.innerHTML = '<p class="ranking-empty">No se pudo cargar el ranking.</p>'; return; }
-  if(!data || data.length === 0){ lista.innerHTML = '<p class="ranking-empty">Todavía no hay resultados. ¡Sé el primero!</p>'; return; }
-
-  const esAdmin = currentPerfil && currentPerfil.rol === 'admin';
-  lista.innerHTML = data.map((fila, i)=>`
-    <div class="ranking-row">
-      <span class="ranking-pos">${i+1}</span>
-      <span class="ranking-alias">${fila.alias || 'Jugador'}</span>
-      <span class="ranking-puntos">${fila.puntos} pts</span>
-      ${esAdmin ? `<button class="ranking-del" data-id="${fila.partida_id}">Quitar</button>` : ''}
-    </div>
-  `).join('');
-
-  if(esAdmin){
-    lista.querySelectorAll('.ranking-del').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        btn.disabled = true;
-        const { error } = await sb.from('partidas').delete().eq('id', btn.dataset.id);
-        if(error) alert('No se pudo borrar: ' + error.message);
-        await cargarRanking();
-      });
-    });
-  }
-}
-
-let rankingYaConectado = false;
-const rankingEstadoEl = document.getElementById('rankingEstado');
-
-sb.channel('ranking-partidas')
-  .on('postgres_changes', { event:'*', schema:'public', table:'partidas', filter:`juego_id=eq.${JUEGO_ID}` }, ()=>{
-    if(!rankingSection.classList.contains('hidden')) cargarRanking();
-  })
-  .subscribe((status)=>{
-    if(status === 'SUBSCRIBED'){
-      rankingEstadoEl.textContent = 'en vivo — se actualiza solo';
-      rankingEstadoEl.classList.add('en-vivo');
-      // Si se había cortado y volvió a conectar, repedimos el ranking
-      // por si nos perdimos algún aviso mientras estuvo desconectado.
-      if(rankingYaConectado && !rankingSection.classList.contains('hidden')) cargarRanking();
-      rankingYaConectado = true;
-    } else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){
-      rankingEstadoEl.textContent = 'Reconectando…';
-      rankingEstadoEl.classList.remove('en-vivo');
-    }
-  });
-
-async function guardarResultadoPartida(puntos, duracionSegundos){
-  if(!currentUser) return;
-  const { error } = await sb.from('partidas').insert({
-    usuario_id: currentUser.id,
-    juego_id: JUEGO_ID,
-    puntos,
-    duracion_segundos: duracionSegundos
-  });
-  if(error) console.error('No se pudo guardar el resultado en el ranking:', error.message);
-}
 
 /* ---------------- DATA ---------------- */
 const CRESTS = {
@@ -2652,7 +2270,6 @@ function simulatePenalties(){
 }
 
 function startTournament(){
-  tournamentStartTime = Date.now();
   draftSection.classList.add('hidden');
   tournamentSection.classList.remove('hidden');
   playNextMatch();
@@ -2801,15 +2418,6 @@ function showSummary(){
     verdict.textContent = `Terminaste con ${wins} victorias, ${draws} empates y ${losses} derrotas (${gf}-${ga})${penaltyNote}. ¡Vuelve a intentarlo!`;
   }
 
-  // Puntaje para el ranking: 3 puntos por cada partido ganado,
-  // 1 por cada empate, 0 por derrota. Si ganaste los 7 partidos
-  // (saliste campeón) se suman 10 puntos extra al final.
-  const esCampeon = (wins === 7);
-  const puntosFinal = wins*3 + draws*1 + (esCampeon ? 10 : 0);
-  const duracionSegundos = tournamentStartTime
-    ? Math.round((Date.now() - tournamentStartTime) / 1000)
-    : null;
-  guardarResultadoPartida(puntosFinal, duracionSegundos);
 }
 
 function resetGameState(){
@@ -2848,7 +2456,6 @@ document.getElementById('scoreboard').addEventListener('click', ()=>{
 });
 
 renderSquad();
-refreshSession();
 </script>
 </body>
 </html>
