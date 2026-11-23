@@ -905,6 +905,7 @@
   }
 
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -2479,6 +2480,52 @@ document.getElementById('scoreboard').addEventListener('click', ()=>{
   introSection.classList.remove('hidden');
   window.scrollTo({top:0, behavior:'smooth'});
 });
+
+/* ---------------- SUPABASE: PLANTILLAS ----------------
+   Los planteles y sus jugadores se leen de la base de datos de Supabase
+   (tablas "planteles" y "jugadores"). La lista TEAMS que está más arriba
+   queda como copia de respaldo: si Supabase no responde (sin internet,
+   proyecto pausado, etc.) el juego sigue funcionando con esos datos.
+   La clave "anon" es pública por diseño: solo permite lo que las reglas
+   de seguridad (RLS) habilitan, que acá es únicamente LEER las plantillas. */
+const SUPABASE_URL = 'https://iegbrckivqvysyglnyct.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllZ2JyY2tpdnF2eXN5Z2xueWN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDUyMTAsImV4cCI6MjEwNzQ4MTIxMH0.ejsvYOXS-KsIXn1kOw8jLloee9DSGqT6AoPvXiuLD58';
+
+async function cargarPlantillasDesdeSupabase(){
+  try{
+    if(!window.supabase) throw new Error('no se cargó la librería de Supabase');
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data, error } = await sb
+      .from('planteles')
+      .select('id, club, anio, torneo, color1, color2, escudo_key, jugadores(nombre, posicion, valoracion, orden)')
+      .order('id', { ascending:true });
+    if(error) throw error;
+
+    const remotos = (data || [])
+      .map(p => ({
+        name: p.club,
+        colors: [p.color1, p.color2],
+        crestKey: p.escudo_key,
+        year: p.anio,
+        torneo: p.torneo,
+        players: (p.jugadores || [])
+          .slice()
+          .sort((a, b) => a.orden - b.orden)
+          .map(j => ({ name: j.nombre, pos: j.posicion, str: j.valoracion }))
+      }))
+      .filter(t => t.players.length > 0);
+    if(remotos.length === 0) throw new Error('Supabase no devolvió planteles');
+
+    // Si ya empezó a armarse un equipo, no se cambia la lista a mitad de partida.
+    if(usedTeams.size === 0 && Object.keys(squad).length === 0){
+      TEAMS.splice(0, TEAMS.length, ...remotos);
+      console.log('Plantillas cargadas desde Supabase:', remotos.length, 'planteles');
+    }
+  }catch(err){
+    console.warn('No se pudo leer Supabase, se usan las plantillas incluidas en el juego:', err.message || err);
+  }
+}
+cargarPlantillasDesdeSupabase();
 
 renderSquad();
 </script>
